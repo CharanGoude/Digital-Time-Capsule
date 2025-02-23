@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Time Capsule</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .upload-section {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .upload-btn {
+            background: #fff;
+            padding: 1.5rem 2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            text-align: center;
+            border: 2px dashed #ddd;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-5px);
+            border-color: #667eea;
+        }
+
+        .upload-btn input[type="file"] {
+            display: none;
+        }
+
+        .upload-btn label {
+            cursor: pointer;
+            display: block;
+        }
+
+        .upload-btn i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-list {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            min-height: 200px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .file-item img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            margin-right: 1rem;
+            border-radius: 4px;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #764ba2;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .upload-section {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Digital Time Capsule</h1>
+        
+        <div class="upload-section">
+            <div class="upload-btn">
+                <input type="file" id="image-upload" accept="image/*" multiple>
+                <label for="image-upload">
+                    <i>📷</i>
+                    <div>Upload Images</div>
+                </label>
+            </div>
+
+            <div class="upload-btn">
+                <input type="file" id="video-upload" accept="video/*" multiple>
+                <label for="video-upload">
+                    <i>🎥</i>
+                    <div>Upload Videos</div>
+                </label>
+            </div>
+
+            <div class="upload-btn">
+                <input type="file" id="text-upload" accept=".txt,.doc,.docx,.pdf" multiple>
+                <label for="text-upload">
+                    <i>📄</i>
+                    <div>Upload Documents</div>
+                </label>
+            </div>
+        </div>
+
+        <div class="file-list" id="file-list">
+            <!-- Uploaded files will appear here -->
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <button onclick="saveCapsule()">Seal Time Capsule</button>
+        </div>
+    </div>
+
+    <script>
+        const fileInputs = document.querySelectorAll('input[type="file"]');
+        const fileList = document.getElementById('file-list');
+
+        fileInputs.forEach(input => {
+            input.addEventListener('change', function(e) {
+                Array.from(e.target.files).forEach(file => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        const fileItem = document.createElement('div');
+                        fileItem.className = 'file-item';
+                        
+                        let preview = '';
+                        if (file.type.startsWith('image/')) {
+                            preview = `<img src="${e.target.result}" alt="${file.name}">`;
+                        } else {
+                            preview = `<div style="width: 40px; text-align: center">${getFileIcon(file)}</div>`;
+                        }
+
+                        fileItem.innerHTML = `
+                            ${preview}
+                            <div>
+                                <div>${file.name}</div>
+                                <small>${file.type} • ${formatFileSize(file.size)}</small>
+                            </div>
+                        `;
+                        
+                        fileList.appendChild(fileItem);
+                    };
+                    
+                    reader.readAsDataURL(file);
+                });
+            });
+        });
+
+        function getFileIcon(file) {
+            if (file.type.startsWith('video/')) return '🎥';
+            if (file.type === 'application/pdf') return '📑';
+            if (file.type.startsWith('text/') || 
+                file.type === 'application/msword' || 
+                file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                return '📄';
+            }
+            return '📁';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+        }
+
+        function saveCapsule() {
+            // Add your save functionality here
+            alert('Time capsule sealed! Your memories are safe for future generations!');
+        }
+    </script>
+</body>
+</html>
